@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Savings & Loan</title>
+    <!-- 1. Include Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 2. Include Nepali Date Converter Library -->
+    <script src="https://cdn.jsdelivr.net/npm/nepali-date-converter@3.3.1/dist/nepali-date-converter.umd.js"></script>
+    <style>
+        /* 3. Use the Inter font */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Simple transition for conditional section */
+        #loanDetails {
+            transition: all 0.3s ease-in-out;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+        }
+        #loanDetails.visible {
+            max-height: 1000px; /* Set to a large value */
+            opacity: 1;
+        }
+        /* Custom spinner */
+        .loader {
+            border-top-color: #3498db;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <nav class="container mx-auto px-6 py-4">
+            <h1 class="text-3xl font-extrabold text-gray-800">ManageMoney.com</h1>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            
+            <!-- Column 1: Landing Page Text -->
+            <div class="mb-8 lg:mb-0">
+                <h2 class="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4">
+                    Manage your money.
+                </h2>
+                <p class="text-lg text-gray-700 mb-6">
+                    Easily track deposits, manage loans, and automate your group's accounting. All entries are saved directly to your Google Sheet and you get notified instantly.
+                </p>
+                <p class="text-base text-gray-600">
+                    Fill out the form to add a new transaction for any member.
+                </p>
+            </div>
+
+            <!-- Column 2: The Application Form -->
+            <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg mx-auto">
+                <h3 class="text-2xl font-bold text-center text-gray-800 mb-6">New Transaction</h3>
+                
+                <form id="accountingForm">
+                    <div class="space-y-5">
+                        
+                        <!-- Member Name -->
+                        <div>
+                            <label for="memberName" class="block text-sm font-medium text-gray-700">Member Name</label>
+                            <input type="text" id="memberName" name="memberName" required
+                                class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="e.g., Ram Sharma">
+                        </div>
+
+                        <!-- Transaction Type -->
+                        <div>
+                            <label for="transactionType" class="block text-sm font-medium text-gray-700">Transaction Type</label>
+                            <select id="transactionType" name="transactionType"
+                                class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option>Regular</option>
+                                <option>Khaja</option>
+                                <option>Fine</option>
+                                <option>Salary</option>
+                                <option>Loan</option>
+                            </select>
+                        </div>
+
+                        <!-- Amounts -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="amount" class="block text-sm font-medium text-gray-700">Amount (Rs.)</label>
+                                <input type="number" id="amount" name="amount" step="0.01" required
+                                    class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="5000">
+                            </div>
+                            <div>
+                                <label for="dueAmount" class="block text-sm font-medium text-gray-700">Due Amount (Optional)</label>
+                                <input type="number" id="dueAmount" name="dueAmount" step="0.01"
+                                    class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="0">
+                            </div>
+                        </div>
+
+                        <!-- English Date -->
+                        <div>
+                            <label for="transactionDate" class="block text-sm font-medium text-gray-700">Transaction Date (English)</label>
+                            <input type="date" id="transactionDate" name="transactionDate" required
+                                class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+
+                        <!-- Nepali Date (Auto-populated) -->
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label for="nepaliDate" class="block text-sm font-medium text-gray-700">Nepali Date</label>
+                                <input type="text" id="nepaliDate" name="nepaliDate" readonly
+                                    class="mt-1 block w-full px-3 py-3 bg-gray-200 border border-gray-300 rounded-lg shadow-sm cursor-not-allowed">
+                            </div>
+                            <div>
+                                <label for="nepaliMonth" class="block text-sm font-medium text-gray-700">Month</label>
+                                <input type="text" id="nepaliMonth" name="nepaliMonth" readonly
+                                    class="mt-1 block w-full px-3 py-3 bg-gray-200 border border-gray-300 rounded-lg shadow-sm cursor-not-allowed">
+                            </div>
+                            <div>
+                                <label for="nepaliYear" class="block text-sm font-medium text-gray-700">Year</label>
+                                <input type="text" id="nepaliYear" name="nepaliYear" readonly
+                                    class="mt-1 block w-full px-3 py-3 bg-gray-200 border border-gray-300 rounded-lg shadow-sm cursor-not-allowed">
+                            </div>
+                        </div>
+                        
+                        <!-- Conditional Loan Details Section -->
+                        <div id="loanDetails" class="space-y-5 border-t border-gray-200 pt-5">
+                            <h4 class="text-lg font-semibold text-gray-700">Loan Details</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="loanStartDate" class="block text-sm font-medium text-gray-700">Loan Start Date</label>
+                                    <input type="date" id="loanStartDate" name="loanStartDate"
+                                        class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label for="loanEndDate" class="block text-sm font-medium text-gray-700">Loan End Date</label>
+                                    <input type="date" id="loanEndDate" name="loanEndDate"
+                                        class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                            </div>
+                             <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="interestPercent" class="block text-sm font-medium text-gray-700">Interest (%)</label>
+                                    <input type="number" id="interestPercent" name="interestPercent" step="0.1"
+                                        class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="10">
+                                </div>
+                                <div>
+                                    <label for="renewCharge" class="block text-sm font-medium text-gray-700">Renew Charge (%)</label>
+                                    <input type="number" id="renewCharge" name="renewCharge" step="0.1" value="3"
+                                        class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="renewDate" class="block text-sm font-medium text-gray-700">Renew Date</label>
+                                <input type="date" id="renewDate" name="renewDate"
+                                    class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div>
+                            <button type="submit" id="submitButton"
+                                class="w-full flex justify-center items-center px-6 py-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
+                                <span id="buttonText">Submit Transaction</span>
+                                <div id="buttonLoader" class_name="loader w-5 h-5 rounded-full border-4 border-t-4 border-gray-200 ml-3 hidden"></div>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <!-- Status Message Area -->
+                <div id="statusMessage" class="mt-6 text-center text-sm"></div>
+            </div>
+
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-white mt-12 border-t border-gray-200">
+        <div class="container mx-auto px-6 py-8 text-center text-gray-500">
+            <p>&copy; 2025 managemoney.com. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- IMPORTANT SETUP ---
+        // 1. Deploy your Google Apps Script as a Web App.
+        // 2. Paste the Web App URL here.
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw2sS8jR2QmBWi4hNzgGSyQMYnv4y-mJFGI01I84zWB1Esw-lScBfl9uzjJFXVguKpd/exec'; 
+        // ---------------------
+
+        const form = document.getElementById('accountingForm');
+        const transactionTypeSelect = document.getElementById('transactionType');
+        const loanDetailsSection = document.getElementById('loanDetails');
+        const transactionDateInput = document.getElementById('transactionDate');
+        const nepaliDateInput = document.getElementById('nepaliDate');
+        const nepaliMonthInput = document.getElementById('nepaliMonth');
+        const nepaliYearInput = document.getElementById('nepaliYear');
+        const submitButton = document.getElementById('submitButton');
+        const buttonText = document.getElementById('buttonText');
+        const buttonLoader = document.getElementById('buttonLoader');
+        const statusMessage = document.getElementById('statusMessage');
+
+        // Nepali Month Names (for display)
+        const nepaliMonths = [
+            'Baisakh', 'Jestha', 'Ashadh', 'Shrawan', 'Bhadra', 
+            'Asoj', 'Kartik', 'Mangsir', 'Poush', 'Magh', 'Falgun', 'Chaitra'
+        ];
+
+        // --- Event Listeners ---
+
+        // 1. Show/Hide Loan Section
+        transactionTypeSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'Loan') {
+                loanDetailsSection.classList.add('visible');
+            } else {
+                loanDetailsSection.classList.remove('visible');
+            }
+        });
+
+        // 2. Auto-convert English date to Nepali date
+        transactionDateInput.addEventListener('change', (e) => {
+            const selectedDate = e.target.value;
+            if (selectedDate) {
+                try {
+                    // Use the nepali-date-converter library
+                    const adDate = new Date(selectedDate);
+                    const bsDate = new NepaliDate(adDate);
+                    
+                    // Format: YYYY-MM-DD
+                    const formattedBSDate = bsDate.format('YYYY-MM-DD');
+                    const bsMonthIndex = bsDate.getMonth(); // 0-11
+                    const bsYear = bsDate.getYear();
+
+                    nepaliDateInput.value = formattedBSDate;
+                    nepaliMonthInput.value = nepaliMonths[bsMonthIndex];
+                    nepaliYearInput.value = bsYear;
+
+                } catch (error) {
+                    console.error("Could not convert date:", error);
+                    nepaliDateInput.value = "Error";
+                    nepaliMonthInput.value = "";
+                    nepaliYearInput.value = "";
+                }
+            }
+        });
+
+        // 3. Set default transaction date to today
+        function setDefaultDate() {
+            const today = new Date().toISOString().split('T')[0];
+            transactionDateInput.value = today;
+            // Trigger change event to auto-populate Nepali date
+            transactionDateInput.dispatchEvent(new Event('change'));
+        }
+
+        // 4. Handle Form Submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Stop default form submission
+
+            if (SCRIPT_URL === 'PASTE_YOUR_WEB_APP_URL_HERE') {
+                showStatus('Error: SCRIPT_URL is not set in index.html!', false);
+                return;
+            }
+
+            // Show loading state
+            setLoading(true);
+
+            // Get all form data
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                // Send data to Google Apps Script
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                setLoading(false);
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.result === 'success') {
+                        showStatus('Transaction added successfully!', true);
+                        form.reset();
+                        setDefaultDate(); // Reset date to today
+                        loanDetailsSection.classList.remove('visible');
+                    } else {
+                        showStatus(`Error: ${result.error || 'Unknown error'}`, false);
+                    }
+                } else {
+                    showStatus(`HTTP Error: ${response.statusText}`, false);
+                }
+
+            } catch (error) {
+                setLoading(false);
+                console.error('Fetch Error:', error);
+                showStatus(`Network Error: ${error.message}`, false);
+            }
+        });
+
+        // --- Helper Functions ---
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                buttonText.textContent = 'Submitting...';
+                buttonLoader.classList.remove('hidden');
+                submitButton.disabled = true;
+                statusMessage.textContent = '';
+            } else {
+                buttonText.textContent = 'Submit Transaction';
+                buttonLoader.classList.add('hidden');
+                submitButton.disabled = false;
+            }
+        }
+
+        function showStatus(message, isSuccess) {
+            statusMessage.textContent = message;
+            statusMessage.className = isSuccess 
+                ? 'mt-6 text-center text-sm text-green-600 font-medium' 
+                : 'mt-6 text-center text-sm text-red-600 font-medium';
+            
+            // Clear message after 5 seconds
+            setTimeout(() => {
+                statusMessage.textContent = '';
+            }, 5000);
+        }
+
+        // --- Initialize ---
+        setDefaultDate(); // Set today's date on load
+
+    </script>
+</body>
+</html>
